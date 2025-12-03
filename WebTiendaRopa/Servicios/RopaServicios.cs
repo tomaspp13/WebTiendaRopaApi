@@ -19,20 +19,8 @@ namespace WebTiendaRopa.Servicios
             _ropaRepository = ropaRepository;
             Errors = new List<string>();
         }
-        public async Task<ActionResult<RopaRespuestaCompleta>?> AgregarRopa(RopaIngresoDto ropaNueva)
+        public async Task<RopaRespuestaCompleta>? AgregarRopa(RopaIngresoDto ropaNueva)
         {
-
-            if (_ropaRepository.ValidarRopa(r => r.Name == ropaNueva.Name) == null) 
-            {
-                Errors.Add("Nombre ya ingresado.Ingrese otro");
-                return null;           
-            }
-
-            if (_ropaRepository.ValidarRopa(r => r.UrlRopa == ropaNueva.UrlRopa) == null)
-            {
-                Errors.Add("Url ya ingresado.Ingrese otro");
-                return null;
-            }
 
             var ropa = new Ropa()
             {
@@ -63,20 +51,8 @@ namespace WebTiendaRopa.Servicios
             return ropaDevuelta;
 
         }
-        public async Task<ActionResult<List<RopaRespuestaListadoDto>>?> FiltroRopa(FiltroRopaDto filtroRopa)
+        public async Task<List<RopaRespuestaListadoDto>>? FiltroRopa(FiltroRopaDto filtroRopa)
         {
-
-            if (_ropaRepository.ValidarRopa(r => r.Name == filtroRopa.Nombre) != null)
-            {
-                Errors.Add("Nombre ya ingresado.Ingrese otro");
-                return null;
-            }
-
-            if (_ropaRepository.ValidarRopa(r => r.UrlRopa == filtroRopa.UrlRopa) != null)
-            {
-                Errors.Add("Url ya ingresado.Ingrese otro");
-                return null;
-            }
 
             var respuesta = _ropaRepository.ObtenerRopas();
 
@@ -132,11 +108,12 @@ namespace WebTiendaRopa.Servicios
             return null;
 
         }
-        public async Task<ActionResult<RopaRespuestaDetalles>?> ObtenerRopasPorId(int id)
+        public async Task<RopaRespuestaDetalles>? ObtenerRopasPorId(int id)
         {
+            
+            var ropa = await _ropaRepository.ObtenerRopasPorId(id);
 
-            var repuesta = await _ropaRepository.ObtenerRopasPorId(id);
-            var ropa = repuesta.Value;
+            if (ropa == null) { Errors.Clear(); return null; }
 
             return new RopaRespuestaDetalles()
             {
@@ -153,39 +130,19 @@ namespace WebTiendaRopa.Servicios
         }
         public bool ValidarIdRopa(int idRopa)
         {
-            if (_ropaRepository.ValidarRopa(r => r.Id == idRopa) == null)
+
+            Errors.Clear();
+
+            if (!_ropaRepository.ValidarRopa(r => r.Id == idRopa).Any())
             {
                 Errors.Add("Id ropa no encontrado");
                 return false;
             }
             return true;
         }
-        public bool ValidarIngresoRopa(FiltroRopaDto ropaIngreso)
-        {
-
-            if (_ropaRepository.ValidarRopa(r => r.UrlRopa == ropaIngreso.UrlRopa && r.Name == ropaIngreso.Nombre) != null)
-            {
-                Errors.Add("Url y nombre de ropa ya ingresado");
-                return false;
-            }
-
-            if (_ropaRepository.ValidarRopa(r => r.UrlRopa == ropaIngreso.UrlRopa) != null)
-            {
-                Errors.Add("Url de ropa ya ingresado");
-                return false;
-            }
-
-            if (_ropaRepository.ValidarRopa(r => r.Name == ropaIngreso.Nombre) != null)
-            {
-                Errors.Add("Nombre de ropa ya ingresado");
-                return false;
-            }
-
-            return true;
-
-        }
         public bool ValidarIngresoRopa(RopaIngresoDto ropaIngreso)
         {
+            Errors.Clear();
 
             if (_ropaRepository.ValidarRopa(r => r.UrlRopa == ropaIngreso.UrlRopa && r.Name == ropaIngreso.Name) != null)
             {
@@ -207,6 +164,26 @@ namespace WebTiendaRopa.Servicios
 
             return true;
 
+        }
+        public bool ValidarIdRopas(List<int> idRopas)
+        {
+
+            Errors.Clear();
+
+            var ropas = _ropaRepository.ValidarRopa(r => idRopas.Contains(r.Id));
+
+            if(ropas == null || !ropas.Any())
+            {
+                Errors.Add("No se encontro ninguna ropa seleccionada");
+                return false;
+            }
+
+            if(ropas.Count() != idRopas.Count) {
+                Errors.Add("No coincide la cantidad de ropa seleccionada con la registrada");
+                return false;
+            }
+
+            return true;
         }
 
     }

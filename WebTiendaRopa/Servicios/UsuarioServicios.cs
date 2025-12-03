@@ -21,14 +21,9 @@ namespace WebTiendaRopa.Servicios
             _usuarioRepository = usuarioRepository;
             Errors = new List<string>();
         }
-        public async Task<ActionResult<UsuarioRespuestaTotalDto>?> CrearUsuario(UsuarioRegistroDto usuarioEnviado)
+        public async Task<UsuarioRespuestaTotalDto>? CrearUsuario(UsuarioRegistroDto usuarioEnviado)
         {
-            if(_usuarioRepository.ValidarUsuario(u => u.Email == usuarioEnviado.Email) != null) 
-            {
-                Errors.Add("Mail ya ingresado.Ingrese otro");
-                return null;            
-            }
-
+ 
             string hash = BCrypt.Net.BCrypt.HashPassword(usuarioEnviado.Contraseña);
 
             var usuario = new Usuario()
@@ -52,50 +47,35 @@ namespace WebTiendaRopa.Servicios
             return usuarioDevuelto;
 
         }
-        public async Task<ActionResult<UsuarioRespuestaDto>?> ObtenerUsuario(UsuarioIngresoDto usuarioEnviado)
+        public async Task<UsuarioRespuestaDto>? ObtenerUsuario(UsuarioIngresoDto usuarioEnviado)
         {
-            if(_usuarioRepository.ValidarUsuario(u => u.Email == usuarioEnviado.Email) == null)
-            {
-                Errors.Add("Correo no encontrado");
-                return null;
-            }
-
-            var resultado = await _usuarioRepository.ObtenerUsuario(usuarioEnviado);
-
-            var datos = resultado.Value;
-
-            bool esValida = BCrypt.Net.BCrypt.Verify(usuarioEnviado.Contraseña, datos.Contraseña);
-
-            if (!esValida)
-            {
-                Errors.Add("Contraseña incorrecta");
-                return null;
-            }
+            var user = await _usuarioRepository.ObtenerUsuarioPorMail(usuarioEnviado.Email);
 
             var usuario = new UsuarioRespuestaDto()
             {
-                Nombre = datos.Nombre,
-                Email = datos.Email,
+                Nombre = user.Nombre,
+                Email = user.Email,
             };
 
             return usuario;
         }
-        public async Task<ActionResult<UsuarioRespuestaTotalDto>?> ObtenerUsuarioPorId(int id)
+        public async Task<UsuarioRespuestaTotalDto>? ObtenerUsuarioPorId(int id)
         {
-            if(_usuarioRepository.ValidarUsuario(u => u.IdUsuario == id) == null) 
+            Errors.Clear();
+
+            if (_usuarioRepository.ValidarUsuario(u => u.IdUsuario == id) == null) 
             {
                 Errors.Add("Usuario no encontrado");
                 return null;
             }
 
             var respuesta = await _usuarioRepository.ObtenerUsuarioPorId(id);
-            var usuario = respuesta.Value;
 
             var usuarioEnviado = new UsuarioRespuestaTotalDto
             {
-                Nombre = usuario.Nombre,
-                Email = usuario.Email,
-                Contraseña = usuario.Contraseña,
+                Nombre = respuesta.Nombre,
+                Email = respuesta.Email,
+                Contraseña = respuesta.Contraseña,
                 IdUsuario = id
             };
 
@@ -103,32 +83,50 @@ namespace WebTiendaRopa.Servicios
         }
         public bool ValidarIdUsuario(int idUsuario)
         {
-            if (_usuarioRepository.ValidarUsuario(u => u.IdUsuario == idUsuario) == null)
+
+            Errors.Clear();
+            var resultado = _usuarioRepository.ValidarUsuario(u => u.IdUsuario == idUsuario);
+
+            if (resultado == null || !resultado.Any())
             {
                 Errors.Add("Id isuario no encontrado");
                 return false;
             }
             return true;
         }
-        public bool ValidarIngresoMail(string correo)
+        public async Task<bool> ValidarRegistroUsuario(UsuarioRegistroDto ingresoUsuario)
         {
-            if (_usuarioRepository.ValidarUsuario(u => u.Email == correo) != null)
+            Errors.Clear();
+            var usuario = await _usuarioRepository.ObtenerUsuarioPorMail(ingresoUsuario.Email);
+
+            if (usuario != null)
             {
-                Errors.Add("Email de usuario ya registrado");
+                Errors.Add("Mail ya ingresado.Ingrese otro");
                 return false;
             }
+
             return true;
         }
-
-        public bool ValidarIngresoContraseña(UsuarioIngresoDto ingresoUsuario)
+        public async Task<bool> ValidarIngresoUsuario(UsuarioIngresoDto ingresoUsuario)
         {
 
+            Errors.Clear();
+            var usuario = await _usuarioRepository.ObtenerUsuarioPorMail(ingresoUsuario.Email);
 
-            //if (_usuarioRepository.ValidarUsuario(u => u.Email == ingresoUsuario.Email && u.Contraseña == ingreso.ci) != null)
+            if (usuario == null)
             {
-                Errors.Add("Email de usuario ya registrado");
+                Errors.Add("Mail no encontrado.Ingrese otro");
                 return false;
             }
+
+            bool esValida = BCrypt.Net.BCrypt.Verify(ingresoUsuario.Contraseña, usuario.Contraseña);
+
+            if (!esValida)
+            {
+                Errors.Add("Contraseña incorrecta");
+                return false;
+            }
+
             return true;
         }
 

@@ -22,6 +22,7 @@ namespace WebTiendaRopa.Validations
 
             RuleFor(x => x).Must(x => x.PrecioMax >= x.PrecioMin).WithMessage("El precio máximo no puede ser menor al precio mínimo");
 
+            RuleFor(x => x.UrlRopa).NotEmpty().WithMessage("Url no ingresado");
         }
 
     }

@@ -7,10 +7,10 @@ namespace WebTiendaRopa.Repository
 {
     public interface IUsuarioRepository<TEntity>
     {
-        Task CrearUsuario(Usuario usuarioEnviado);
+        Task CrearUsuario(TEntity usuarioEnviado);
         Task GuardarUsuario();
-        Task<ActionResult<Usuario>?> ObtenerUsuario(UsuarioIngresoDto usuarioEnviado);
-        Task<ActionResult<Usuario>?> ObtenerUsuarioPorId(int id);
+        Task<TEntity>? ObtenerUsuarioPorMail(string mail);
+        Task<TEntity>? ObtenerUsuarioPorId(int id);
         IEnumerable<TEntity> ValidarUsuario(Func<TEntity,bool>filtro);
 
     }

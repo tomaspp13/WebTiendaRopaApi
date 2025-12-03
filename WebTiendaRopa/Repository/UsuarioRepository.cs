@@ -23,9 +23,9 @@ namespace WebTiendaRopa.Repository
         {
             await _context.SaveChangesAsync();
         }
-        public async Task<ActionResult<Usuario>?> ObtenerUsuario(UsuarioIngresoDto usuarioEnviado)
+        public async Task<Usuario>? ObtenerUsuarioPorMail(string mail)
         {
-            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == usuarioEnviado.Email);
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == mail);
 
             if (usuario == null)
             {
@@ -34,14 +34,14 @@ namespace WebTiendaRopa.Repository
 
             return usuario;
         }
-        public async Task<ActionResult<Usuario>?> ObtenerUsuarioPorId(int id)
+        public async Task<Usuario>? ObtenerUsuarioPorId(int id)
         {
             var respuesta = await _context.Usuarios.FindAsync(id);
 
             return respuesta;
 
         }
-        IEnumerable<Usuario> IUsuarioRepository<Usuario>.ValidarUsuario(Func<Usuario, bool> filtro)
+        public IEnumerable<Usuario> ValidarUsuario(Func<Usuario, bool> filtro)
         {
             return _context.Usuarios.Where(filtro).ToList();
         }

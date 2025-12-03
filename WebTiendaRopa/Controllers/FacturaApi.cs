@@ -18,12 +18,13 @@ namespace WebTiendaRopa.Controllers
         private readonly IValidator<CompraDto> _validatorCompra;
         private readonly IUsuarioServicios<UsuarioRespuestaTotalDto, UsuarioRespuestaDto> _usuarioServicios;
         private readonly IFacturaServicios<FacturaRespuestaDto, FacturaRespuestaCompletaDto> _facturaServicios;
-
-        public FacturaApi(IUsuarioServicios<UsuarioRespuestaTotalDto, UsuarioRespuestaDto> usuarioServicios, IFacturaServicios<FacturaRespuestaDto, FacturaRespuestaCompletaDto> facturaServicios, IValidator<CompraDto> validatorCompra)
+        private readonly IRopasServicios<RopaRespuestaListadoDto, RopaRespuestaDetalles, RopaRespuestaCompleta> _ropasServicios;
+        public FacturaApi(IUsuarioServicios<UsuarioRespuestaTotalDto, UsuarioRespuestaDto> usuarioServicios, IFacturaServicios<FacturaRespuestaDto, FacturaRespuestaCompletaDto> facturaServicios, IValidator<CompraDto> validatorCompra, IRopasServicios<RopaRespuestaListadoDto, RopaRespuestaDetalles, RopaRespuestaCompleta> ropasServicios)
         {
             _usuarioServicios = usuarioServicios;
             _validatorCompra = validatorCompra;
             _facturaServicios = facturaServicios;
+            _ropasServicios = ropasServicios;
         }
 
         [HttpPost("CrearFactura")]
@@ -32,26 +33,40 @@ namespace WebTiendaRopa.Controllers
 
             var validacion = _validatorCompra.Validate(compraNueva);
 
-            if (validacion != null)
+            if (!validacion.IsValid)
             {
                 return BadRequest(validacion.Errors);
             }
 
-            var respuesta = await _facturaServicios.CrearFactura(compraNueva);
+            if(_usuarioServicios.ValidarIdUsuario(compraNueva.IdUsuario) == false)
+            {   
+                return BadRequest(_usuarioServicios.Errors);
+            }
 
-            var factura = respuesta.Value;
+            if(_ropasServicios.ValidarIdRopas(compraNueva.IdCompras) == false) 
+            { 
+                return BadRequest(_ropasServicios.Errors); 
+            }
 
-            return factura == null ? BadRequest(_facturaServicios.Errors) : CreatedAtAction(nameof(MostrarFacturaPorIdUsuario), new { idUsuario = factura.IdUsuario}, factura);
+            var factura = await _facturaServicios.CrearFactura(compraNueva);
+
+            return CreatedAtAction(nameof(MostrarFacturaPorIdUsuario), new { idUsuario = factura.IdUsuario}, factura);
         }
 
         [HttpGet("MostrarFacturaPorIdUsuario/{idUsuario}")]
         public async Task<ActionResult<FacturaRespuestaDto>> MostrarFacturaPorIdUsuario(int idUsuario)
         {
-            if(_usuarioServicios.ValidarIdUsuario(idUsuario) == false) { return BadRequest(_usuarioServicios.Errors); }
+            if (!_usuarioServicios.ValidarIdUsuario(idUsuario))
+                return BadRequest(_usuarioServicios.Errors);
 
             var facturas = await _facturaServicios.MostrarFacturaConDatosDelUsuarioYCompras(idUsuario);
 
-            return facturas == null || !facturas.Any() ? BadRequest(_facturaServicios.Errors) : Ok(facturas);
+            if (facturas == null || !facturas.Any())
+            {
+                return BadRequest(_facturaServicios.Errors);
+            }
+
+            return Ok(facturas);
         }
     }
 }

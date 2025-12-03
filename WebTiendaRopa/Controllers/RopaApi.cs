@@ -42,7 +42,7 @@ namespace WebTiendaRopa.Controllers
 
             var resultado = await _ropasServicios.ObtenerRopasPorId(id);
 
-            return resultado == null ? NotFound(_ropasServicios.Errors) : Ok(resultado);        
+            return Ok(resultado);        
         }
 
         [HttpPost("FiltroRopa")]
@@ -50,14 +50,11 @@ namespace WebTiendaRopa.Controllers
         {
 
             var validacion = await _validationsFiltroRopa.ValidateAsync(filtroRopa);
-
-            if(_ropasServicios.ValidarIngresoRopa(filtroRopa) == false) { return BadRequest(_ropasServicios.Errors); }
-
-            if(validacion != null) { return BadRequest(validacion.Errors); }
+            if (validacion != null) { return BadRequest(validacion.Errors); }
 
             var ropaFiltradas = await _ropasServicios.FiltroRopa(filtroRopa);
 
-            return ropaFiltradas == null ? BadRequest(_ropasServicios.Errors) : Ok(ropaFiltradas);
+            return Ok(ropaFiltradas);
 
         }
 
@@ -66,16 +63,13 @@ namespace WebTiendaRopa.Controllers
         {
 
             var validar = _validationsIngresoRopa.Validate(ropaNueva);
+            if (validar != null) { return BadRequest(validar.Errors); }
 
             if (_ropasServicios.ValidarIngresoRopa(ropaNueva) == false) { return BadRequest(_ropasServicios.Errors); }
 
-            if(validar != null) { return BadRequest(validar.Errors);}
+            var ropa = await _ropasServicios.AgregarRopa(ropaNueva);
 
-            var resultado = await _ropasServicios.AgregarRopa(ropaNueva);
-
-            var ropa = resultado.Value;
-
-            return ropa != null ? CreatedAtAction(nameof(ObtenerRopasPorId), new { id = ropa.Id }, ropa) : BadRequest(_ropasServicios.Errors);
+            return CreatedAtAction(nameof(ObtenerRopasPorId), new { id = ropa.Id }, ropa);
 
         }
 

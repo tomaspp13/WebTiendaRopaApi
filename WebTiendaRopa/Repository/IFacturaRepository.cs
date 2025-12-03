@@ -7,7 +7,7 @@ namespace WebTiendaRopa.Repository
     public interface IFacturaRepository <TEntity>
     {
         Task CrearFactura(Factura facturaNueva);
-        Task<ActionResult<List<Factura>>> MostrarFacturaConDatosDelUsuarioYCompras(int idUsuario);
+        Task<List<Factura>> MostrarFacturaConDatosDelUsuarioYCompras(int idUsuario);
         Task GuardarFactura();
         IEnumerable<TEntity> ValidarFactura(Func<TEntity, bool> filtro);
 

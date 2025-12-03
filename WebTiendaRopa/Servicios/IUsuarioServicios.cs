@@ -6,10 +6,11 @@ namespace WebTiendaRopa.Servicios
     public interface IUsuarioServicios<UsuarioRespuestaTotalDto, UsuarioRespuestaDto>
     {
         public List<string> Errors { get; }
-        Task<ActionResult<UsuarioRespuestaTotalDto>?> CrearUsuario(UsuarioRegistroDto usuarioEnviado);
-        Task<ActionResult<UsuarioRespuestaDto>?> ObtenerUsuario(UsuarioIngresoDto usuarioEnviado);
-        Task<ActionResult<UsuarioRespuestaTotalDto>?> ObtenerUsuarioPorId(int id);
+        Task<UsuarioRespuestaTotalDto>? CrearUsuario(UsuarioRegistroDto usuarioEnviado);
+        Task<UsuarioRespuestaDto>? ObtenerUsuario(UsuarioIngresoDto usuarioEnviado);
+        Task<UsuarioRespuestaTotalDto>? ObtenerUsuarioPorId(int id);
         bool ValidarIdUsuario(int idUsuario);
-        bool ValidarIngresoMail(string correo);
+        Task<bool> ValidarIngresoUsuario(UsuarioIngresoDto ingresoUsuario);
+        Task<bool> ValidarRegistroUsuario(UsuarioRegistroDto ingresoUsuario);
     }
 }

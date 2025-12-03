@@ -9,12 +9,12 @@ namespace WebTiendaRopa.Servicios
     {
         public List<string> Errors { get; }
         IEnumerable<L>? ObtenerRopas();
-        Task<ActionResult<D>?> ObtenerRopasPorId(int id);
-        Task<ActionResult<List<L>>?> FiltroRopa(FiltroRopaDto filtroRopa);
-        Task<ActionResult<C>?> AgregarRopa(RopaIngresoDto ropaNueva);
+        Task<D>? ObtenerRopasPorId(int id);
+        Task<List<L>>? FiltroRopa(FiltroRopaDto filtroRopa);
+        Task<C>? AgregarRopa(RopaIngresoDto ropaNueva);
         bool ValidarIdRopa(int idRopa);
-        bool ValidarIngresoRopa(FiltroRopaDto ropaIngreso);
         bool ValidarIngresoRopa(RopaIngresoDto ropaIngreso);
+        bool ValidarIdRopas(List<int> idRopas);   
 
     }
 }

@@ -33,30 +33,37 @@ namespace WebTiendaRopa.Controllers
             var validacion = _validatorUsuarioIngreso.Validate(usuarioEnviado);
             if (validacion != null) { return BadRequest(validacion.Errors); }
 
-            var resultado = await _usuarioServicio.ObtenerUsuario(usuarioEnviado);
-            return resultado == null ? BadRequest(_usuarioServicio.Errors) : Ok(resultado);
+            if (await _usuarioServicio.ValidarIngresoUsuario(usuarioEnviado) == false)
+            {
+                return BadRequest(_usuarioServicio.Errors);
+            }
+
+            var usuario = _usuarioServicio.ObtenerUsuario(usuarioEnviado);
+
+            return Ok(usuario);
         }
 
         [HttpPost("CrearUsuario")]
-        public async Task<ActionResult<UsuarioIngresoDto>?> CrearUsuario(UsuarioRegistroDto usuarioEnviado)
+        public async Task<ActionResult<UsuarioIngresoDto>>? CrearUsuario(UsuarioRegistroDto usuarioEnviado)
         {
             var validar = _validatorUsuarioRegistro.Validate(usuarioEnviado);
             if(validar != null) { return BadRequest(validar.Errors); }
 
-            //if(_usuarioServicio.ValidarIngresoUsuario(string correo) == false) { return BadRequest(_usuarioServicio.Errors); }
+            if(await _usuarioServicio.ValidarRegistroUsuario(usuarioEnviado) == false) { return BadRequest(_usuarioServicio.Errors); }
 
-            var resultado = await _usuarioServicio.CrearUsuario(usuarioEnviado);
-            var usuario = resultado.Value;
-            return usuario == null? BadRequest(_usuarioServicio.Errors) : CreatedAtAction(nameof(ObtenerUsuarioPorId), new { id = usuario.IdUsuario}, usuario);
+            var usuario = await _usuarioServicio.CrearUsuario(usuarioEnviado);
+  
+            return CreatedAtAction(nameof(ObtenerUsuarioPorId), new { id = usuario.IdUsuario}, usuario);
 
         }
 
         [HttpGet("ObtenerUsuarioPorId")]
         public async Task<ActionResult<UsuarioRespuestaTotalDto>> ObtenerUsuarioPorId(int id)
         {
+            if (_usuarioServicio.ValidarIdUsuario(id) == false) { return BadRequest         (_usuarioServicio.Errors); }
 
             var respuesta = await _usuarioServicio.ObtenerUsuarioPorId(id);
-            return respuesta == null ? BadRequest(_usuarioServicio.Errors) : Ok(respuesta.Value);
+            return Ok(respuesta);
 
         }
 

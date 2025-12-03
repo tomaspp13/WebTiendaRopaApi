@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using TiendaRopa.Data.Context;
 using TiendaRopa.Modelos;
 using WebTiendaRopa.DTOs;
@@ -18,10 +19,9 @@ namespace WebTiendaRopa.Repository
         {
             return _context.Ropa.AsQueryable();
         }
-        public async Task<ActionResult<Ropa>?> ObtenerRopasPorId(int id)
+        public async Task<Ropa>? ObtenerRopasPorId(int id)
         {
-            return await _context.Ropa.FindAsync(id);
-       
+            return await _context.Ropa.FindAsync(id);       
         }
         public async Task Add(Ropa ropa)
         {
@@ -31,7 +31,7 @@ namespace WebTiendaRopa.Repository
         {
             await _context.SaveChangesAsync();
         }
-        IEnumerable<Ropa> IRopaRepository<Ropa>.ValidarRopa(Func<Ropa, bool> filtro)
+        public IEnumerable<Ropa> ValidarRopa(Expression<Func<Ropa, bool>> filtro)
         {
             return _context.Ropa.Where(filtro).ToList(); ;
         }

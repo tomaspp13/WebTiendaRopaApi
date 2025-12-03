@@ -13,25 +13,21 @@ namespace WebTiendaRopa.Repository
         {
             _context = context;
         }
-
         public async Task CrearFactura(Factura facturaNueva)
         {
             _context.Factura.Add(facturaNueva);
             await _context.SaveChangesAsync();
         }
-
-        public async Task<ActionResult<List<Factura>>> MostrarFacturaConDatosDelUsuarioYCompras(int idUsuario)
+        public async Task<List<Factura>> MostrarFacturaConDatosDelUsuarioYCompras(int idUsuario)
         {
             var facturas = await _context.Factura.Include(f => f.Usuario).Include(f => f.Compras).ThenInclude(fc => fc.Ropa).Where( f => f.IdUsuario == idUsuario).ToListAsync();
 
-            return new ActionResult<List<Factura>>(facturas);
+            return new List<Factura>(facturas);
         }
-
         public async Task GuardarFactura()
         {
             await _context.SaveChangesAsync();
         }
-
         IEnumerable<Factura> IFacturaRepository<Factura>.ValidarFactura(Func<Factura, bool> filtro)
         {
             return _context.Factura.Where(filtro).ToList();

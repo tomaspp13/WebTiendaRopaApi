@@ -19,7 +19,7 @@ namespace WebTiendaRopa.Servicios
             _usuarioServicio = usuarioServicio;
             Errors = new List<string>();
         }
-        public async Task<ActionResult<FacturaRespuestaCompletaDto>?> CrearFactura(CompraDto compraNueva)
+        public async Task<FacturaRespuestaCompletaDto>? CrearFactura(CompraDto compraNueva)
         {
 
             var factura = new Factura()
@@ -59,37 +59,48 @@ namespace WebTiendaRopa.Servicios
         public async Task<IEnumerable<FacturaRespuestaDto>?> MostrarFacturaConDatosDelUsuarioYCompras(int idUsuario)
         {
 
-            var datos = await _facturaRepository.MostrarFacturaConDatosDelUsuarioYCompras(idUsuario);
+            Errors.Clear();
 
-            var respuesta = datos.Value;
+            var respuesta = await _facturaRepository.MostrarFacturaConDatosDelUsuarioYCompras(idUsuario);
 
-            return respuesta != null ? respuesta.Select(d => new FacturaRespuestaDto()
+            if (respuesta != null) 
             {
-                Email = d.Usuario.Email,
-                Fecha = d.Fecha,
-                Nombre = d.Usuario.Nombre,
-                Precio = d.Precio,
-
-                Compras = d.Compras.Select(c => new RopaRespuestaListadoDto
+                var facturas = respuesta.Select(d => new FacturaRespuestaDto()
                 {
-                    Name = c.Ropa.Name,
-                    UrlRopa = c.Ropa.UrlRopa
+                    Email = d.Usuario.Email,
+                    Fecha = d.Fecha,
+                    Nombre = d.Usuario.Nombre,
+                    Precio = d.Precio,
 
-                }).ToList()
+                    Compras = d.Compras.Select(c => new RopaRespuestaListadoDto
+                    {
+                        Name = c.Ropa.Name,
+                        UrlRopa = c.Ropa.UrlRopa
 
-            }).ToList() : null;
+                    }).ToList()
+
+                }).ToList();
+            }
+
+            Errors.Add("Datos de la factura no encontrada");
+
+            return null;
+
         }
-
         public bool ValidarIdFactura(int idFactura)
         {
-            if (_facturaRepository.ValidarFactura(f => f.IdFactura == idFactura) == null)
+            Errors.Clear();
+
+            var facturas = _facturaRepository.ValidarFactura(f => f.IdFactura == idFactura);
+
+            if (facturas == null || !facturas.Any())
             {
                 Errors.Add("Id factura no encontrado");
                 return false;
             }
+
             return true;
         }
-
 
     }
 
