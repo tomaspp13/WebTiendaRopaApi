@@ -1,6 +1,6 @@
 API REST desarrollada en ASP.NET Core siguiendo principios SOLID y arquitectura en capas para la gestión de una tienda de ropa.
 
-Arquitectura
+🧠 Arquitectura
 
 Capa de Dominio (Modelos)
 
@@ -10,7 +10,7 @@ Capa de Aplicación (Servicios, DTOs, Validaciones)
 
 Capa de Presentación (Web API Controllers)
 
-Tecnologías
+⚙️ Tecnologías
 
 C# / ASP.NET Core
 
@@ -24,8 +24,7 @@ Repository Pattern
 
 DTOs y Validaciones
 
-
-Funcionalidades
+📌 Funcionalidades
 
 CRUD de productos (Ropa)
 
@@ -35,8 +34,10 @@ Facturación y compras
 
 Validaciones de datos
 
-Arquitectura desacoplada y escalable}
+Arquitectura desacoplada y escalable
 
-Links
+🔗 Links
 
-Swagger Demo:
+GitHub: link
+
+Swagger Demo: link (cuando lo deployes)
