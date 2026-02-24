@@ -38,6 +38,4 @@ Arquitectura desacoplada y escalable
 
 🔗 Links
 
-GitHub: link
-
-Swagger Demo: link (cuando lo deployes)
+Swagger Demo: 
