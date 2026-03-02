@@ -16,7 +16,7 @@ C# / ASP.NET Core
 
 Entity Framework Core
 
-SQL Server
+Postgrest SQL
 
 Swagger
 
